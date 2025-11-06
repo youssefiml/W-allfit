@@ -23,9 +23,11 @@ connectDB();
 const allowedOrigins = [
   'http://localhost:5173',
   'http://localhost:3000',
+  'https://w-allfit-pi.vercel.app',
   process.env.CLIENT_URL,
   process.env.RAILWAY_PUBLIC_DOMAIN,
   process.env.RAILWAY_STATIC_URL,
+  process.env.VERCEL_URL,
 ].filter(Boolean);
 
 app.use(cors({
@@ -33,8 +35,8 @@ app.use(cors({
     // Allow requests with no origin (like mobile apps or curl requests)
     if (!origin) return callback(null, true);
     
-    // In production, allow same-origin requests (when server serves client)
-    if (process.env.NODE_ENV === 'production' && !origin.includes('http')) {
+    // In production, allow all origins if no specific CLIENT_URL is set
+    if (process.env.NODE_ENV === 'production' && !process.env.CLIENT_URL) {
       return callback(null, true);
     }
     
@@ -67,7 +69,17 @@ if (process.env.NODE_ENV === "production") {
   app.use(express.static(clientBuildPath));
   
   // Serve React app for all non-API routes (must be last)
-  app.get("*", (req, res) => {
+  // Use a middleware instead of wildcard route for Express 5 compatibility
+  app.use((req, res, next) => {
+    // Skip API routes
+    if (req.path.startsWith("/api")) {
+      return next();
+    }
+    // Skip static files (already handled by express.static)
+    if (req.path.includes(".") && !req.path.endsWith(".html")) {
+      return next();
+    }
+    // Serve React app for all other routes
     res.sendFile(path.join(clientBuildPath, "index.html"));
   });
 }
