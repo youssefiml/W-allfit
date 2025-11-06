@@ -30,27 +30,47 @@ const allowedOrigins = [
   process.env.VERCEL_URL,
 ].filter(Boolean);
 
+// Custom CORS middleware to ensure proper origin handling
+app.use((req, res, next) => {
+  const origin = req.headers.origin;
+  
+  // Set CORS headers manually to ensure correct origin is returned
+  if (origin) {
+    // In production, allow the Vercel frontend and any other allowed origins
+    if (process.env.NODE_ENV === 'production') {
+      // Allow all origins in production (or check specific ones)
+      res.setHeader('Access-Control-Allow-Origin', origin);
+    } else {
+      // In development, allow all
+      res.setHeader('Access-Control-Allow-Origin', origin);
+    }
+  } else {
+    // No origin header (same-origin or mobile app)
+    res.setHeader('Access-Control-Allow-Origin', '*');
+  }
+  
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  res.setHeader('Access-Control-Allow-Credentials', 'true');
+  res.setHeader('Access-Control-Expose-Headers', 'Content-Type');
+  
+  // Handle preflight requests
+  if (req.method === 'OPTIONS') {
+    return res.status(200).end();
+  }
+  
+  next();
+});
+
+// Also use cors middleware as backup
 app.use(cors({
   origin: function (origin, callback) {
-    // Allow requests with no origin (like mobile apps or curl requests)
-    if (!origin) return callback(null, true);
-    
-    // In production, be more permissive to allow frontend on different domain
-    if (process.env.NODE_ENV === 'production') {
-      // Allow all origins in production (or be specific with CLIENT_URL)
-      if (!process.env.CLIENT_URL || allowedOrigins.indexOf(origin) !== -1) {
-        return callback(null, true);
-      }
-    }
-    
-    // In development, check allowed origins
-    if (allowedOrigins.indexOf(origin) !== -1) {
-      callback(null, true);
-    } else {
-      callback(null, true); // Allow in development for easier testing
-    }
+    // Allow all origins - we're handling it manually above
+    callback(null, true);
   },
-  credentials: true
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
 }));
 app.use(express.json());
 
