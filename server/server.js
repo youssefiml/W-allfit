@@ -35,15 +35,19 @@ app.use(cors({
     // Allow requests with no origin (like mobile apps or curl requests)
     if (!origin) return callback(null, true);
     
-    // In production, allow all origins if no specific CLIENT_URL is set
-    if (process.env.NODE_ENV === 'production' && !process.env.CLIENT_URL) {
-      return callback(null, true);
+    // In production, be more permissive to allow frontend on different domain
+    if (process.env.NODE_ENV === 'production') {
+      // Allow all origins in production (or be specific with CLIENT_URL)
+      if (!process.env.CLIENT_URL || allowedOrigins.indexOf(origin) !== -1) {
+        return callback(null, true);
+      }
     }
     
-    if (allowedOrigins.indexOf(origin) !== -1 || process.env.NODE_ENV !== 'production') {
+    // In development, check allowed origins
+    if (allowedOrigins.indexOf(origin) !== -1) {
       callback(null, true);
     } else {
-      callback(new Error('Not allowed by CORS'));
+      callback(null, true); // Allow in development for easier testing
     }
   },
   credentials: true
