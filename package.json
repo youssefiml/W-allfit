@@ -1,0 +1,23 @@
+{
+  "name": "wallfit",
+  "version": "1.0.0",
+  "description": "WALLFIT - Women's Wellness Fitness Application",
+  "private": true,
+  "scripts": {
+    "install-server": "cd server && npm install",
+    "install-client": "cd client && npm install",
+    "install-all": "npm run install-server && npm run install-client",
+    "build": "npm run install-client && cd client && npm run build",
+    "build-client": "cd client && npm run build",
+    "start": "cd server && npm start",
+    "postinstall": "cd server && npm install && cd ../client && npm install"
+  },
+  "keywords": ["fitness", "wellness", "women", "health"],
+  "author": "",
+  "license": "ISC",
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=9.0.0"
+  }
+}
+
