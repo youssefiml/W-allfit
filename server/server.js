@@ -30,41 +30,24 @@ const allowedOrigins = [
   process.env.VERCEL_URL,
 ].filter(Boolean);
 
-// Custom CORS middleware to ensure proper origin handling
-app.use((req, res, next) => {
-  const origin = req.headers.origin;
-  
-  // Set CORS headers manually to ensure correct origin is returned
-  if (origin) {
-    // Always return the requesting origin (mirror it back)
-    // This is required when credentials: true is used
-    res.setHeader('Access-Control-Allow-Origin', origin);
-  }
-  // If no origin header, don't set CORS headers (same-origin request)
-  
-  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-  res.setHeader('Access-Control-Allow-Credentials', 'true');
-  res.setHeader('Access-Control-Expose-Headers', 'Content-Type');
-  res.setHeader('Access-Control-Max-Age', '86400'); // Cache preflight for 24 hours
-  
-  // Handle preflight requests
-  if (req.method === 'OPTIONS') {
-    return res.status(200).end();
-  }
-  
-  next();
-});
-
-// Also use cors middleware as backup
+// CORS configuration - must be before other middleware
 app.use(cors({
   origin: function (origin, callback) {
-    // Allow all origins - we're handling it manually above
+    // Allow requests with no origin (same-origin, mobile apps, Postman)
+    if (!origin) {
+      return callback(null, true);
+    }
+    
+    // In production, allow all origins (your Vercel frontend)
+    // In development, allow all localhost origins
     callback(null, true);
   },
   credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+  exposedHeaders: ['Content-Type'],
+  maxAge: 86400, // Cache preflight for 24 hours
+  optionsSuccessStatus: 200 // Some legacy browsers need 200
 }));
 app.use(express.json());
 
