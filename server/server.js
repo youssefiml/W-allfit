@@ -38,16 +38,17 @@ app.use(cors({
       return callback(null, true);
     }
     
-    // In production, allow all origins (your Vercel frontend)
-    // In development, allow all localhost origins
-    callback(null, true);
+    // Explicitly return the requesting origin to ensure it's set correctly
+    // This prevents Railway or other proxies from overriding the header
+    callback(null, origin);
   },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
   allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
   exposedHeaders: ['Content-Type'],
   maxAge: 86400, // Cache preflight for 24 hours
-  optionsSuccessStatus: 200 // Some legacy browsers need 200
+  optionsSuccessStatus: 200, // Some legacy browsers need 200
+  preflightContinue: false // Let cors handle preflight
 }));
 app.use(express.json());
 
