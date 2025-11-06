@@ -36,23 +36,17 @@ app.use((req, res, next) => {
   
   // Set CORS headers manually to ensure correct origin is returned
   if (origin) {
-    // In production, allow the Vercel frontend and any other allowed origins
-    if (process.env.NODE_ENV === 'production') {
-      // Allow all origins in production (or check specific ones)
-      res.setHeader('Access-Control-Allow-Origin', origin);
-    } else {
-      // In development, allow all
-      res.setHeader('Access-Control-Allow-Origin', origin);
-    }
-  } else {
-    // No origin header (same-origin or mobile app)
-    res.setHeader('Access-Control-Allow-Origin', '*');
+    // Always return the requesting origin (mirror it back)
+    // This is required when credentials: true is used
+    res.setHeader('Access-Control-Allow-Origin', origin);
   }
+  // If no origin header, don't set CORS headers (same-origin request)
   
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
   res.setHeader('Access-Control-Allow-Credentials', 'true');
   res.setHeader('Access-Control-Expose-Headers', 'Content-Type');
+  res.setHeader('Access-Control-Max-Age', '86400'); // Cache preflight for 24 hours
   
   // Handle preflight requests
   if (req.method === 'OPTIONS') {
