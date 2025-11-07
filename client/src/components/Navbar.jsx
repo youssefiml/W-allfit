@@ -186,7 +186,7 @@ export default function Navbar() {
                   <NavLink to="/login" icon={FitnessIcon} onNavigate={() => setMobileMenuOpen(false)}>
                     Login
                   </NavLink>
-                  <NavLink to="/register" icon={CheckIcon} variant="primary" onNavigate={() => setMobileMenuOpen(false)}>
+                  <NavLink to="/register" icon={CheckIcon} onNavigate={() => setMobileMenuOpen(false)}>
                     Register
                   </NavLink>
                 </>
