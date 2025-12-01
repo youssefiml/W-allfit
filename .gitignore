@@ -48,3 +48,4 @@ coverage/
 .cache/
 .temp/
 
+SAMPLE_PROGRAMS_OUTPUT.json
